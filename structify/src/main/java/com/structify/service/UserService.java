@@ -6,6 +6,10 @@ import com.structify.entity.User;
 import com.structify.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.structify.exception.EmailAlreadyExistsException;
+import com.structify.dto.LoginRequest;
+import com.structify.dto.LoginResponse;
+import com.structify.exception.InvalidCredentialsException;
 
 @Service
 public class UserService {
@@ -23,7 +27,9 @@ public class UserService {
                 .trim()
                 .toLowerCase();
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException(
+                    "An account with this email already exists"
+            );
         }
         User user = new User();
         user.setName(request.getName().trim());
@@ -36,6 +42,38 @@ public class UserService {
                 savedUser.getId(),
                 savedUser.getName(),
                 savedUser.getEmail()
+        );
+    }
+    public LoginResponse loginUser(LoginRequest request) {
+
+        String normalizedEmail = request.getEmail()
+                .trim()
+                .toLowerCase();
+
+        User user = userRepository
+                .findByEmail(normalizedEmail)
+                .orElseThrow(() ->
+                        new InvalidCredentialsException(
+                                "Invalid email or password"
+                        )
+                );
+
+        boolean passwordMatches = passwordEncoder.matches(
+                request.getPassword(),
+                user.getPasswordHash()
+        );
+
+        if (!passwordMatches) {
+            throw new InvalidCredentialsException(
+                    "Invalid email or password"
+            );
+        }
+
+        return new LoginResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                "Login successful"
         );
     }
 }

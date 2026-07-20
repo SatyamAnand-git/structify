@@ -1,5 +1,5 @@
 package com.structify.service;
-
+import com.structify.security.JwtService;
 import com.structify.dto.RegisterRequest;
 import com.structify.dto.RegisterResponse;
 import com.structify.entity.User;
@@ -15,12 +15,15 @@ import com.structify.exception.InvalidCredentialsException;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
     public UserService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
     public RegisterResponse registerUser(RegisterRequest request) {
         String normalizedEmail = request.getEmail()
@@ -69,11 +72,14 @@ public class UserService {
             );
         }
 
+        String token = jwtService.generateToken(user.getEmail());
+
         return new LoginResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                "Login successful"
+                token
         );
     }
+
 }

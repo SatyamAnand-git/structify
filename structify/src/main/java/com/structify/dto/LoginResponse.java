@@ -2,7 +2,6 @@ package com.structify.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 @Getter
 @AllArgsConstructor
 public class LoginResponse {
@@ -10,5 +9,5 @@ public class LoginResponse {
     private Long id;
     private String name;
     private String email;
-    private String message;
+    private String token;
 }

@@ -31,18 +31,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        // No JWT provided
+
+
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Remove "Bearer " and get the actual JWT
         String token = authHeader.substring(7);
+
+
 
         if (jwtService.isTokenValid(token)) {
 
+
+
             String email = jwtService.extractEmail(token);
+
+
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -59,6 +67,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder
                     .getContext()
                     .setAuthentication(authentication);
+
+            System.out.println(
+                    "AUTHENTICATION SET: "
+                            + SecurityContextHolder
+                            .getContext()
+                            .getAuthentication()
+            );
+
+        } else {
+
+
         }
 
         filterChain.doFilter(request, response);
